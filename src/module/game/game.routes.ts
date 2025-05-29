@@ -58,6 +58,8 @@ router.post(
   GameController.addShare,
 );
 
+router.get('/getAllGame/:id', GameController.singleGame);
+
 router.get('/getAllGame', GameController.getAllGame);
 
 router.get('/getAllApprovedGame', GameController.getAllApproveGame);

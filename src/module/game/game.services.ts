@@ -904,6 +904,20 @@ const searchGameIntoDb = async (query: Record<string, unknown>) => {
   return games;
 };
 
+const getSingleGameIntoDb = async (id: string) => {
+  try {
+    const gameData = await Game.findOne({ _id: id });
+
+    return gameData;
+  } catch (error: any) {
+    throw new AppError(
+      httpStatus.INTERNAL_SERVER_ERROR,
+      error.message || 'Something went wrong',
+      '',
+    );
+  }
+};
+
 const GameServices = {
   createNewGameIntoDb,
   getAllGameIntoDb,
@@ -919,6 +933,7 @@ const GameServices = {
   updateGameIntoDb,
   updateLinkTypeIntoDb,
   searchGameIntoDb,
+  getSingleGameIntoDb,
 };
 
 export default GameServices;

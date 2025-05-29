@@ -46,7 +46,6 @@ const createNewGame: RequestHandlerWithFiles = catchAsync(async (req, res) => {
 });
 
 const getAllGame: RequestHandler = catchAsync(async (req, res) => {
-
   const result = await GameServices.getAllGameIntoDb(req.query, true);
 
   sendResponse(res, {
@@ -58,7 +57,6 @@ const getAllGame: RequestHandler = catchAsync(async (req, res) => {
 });
 
 const getAllGamebyAdmin: RequestHandler = catchAsync(async (req, res) => {
-
   const result = await GameServices.getAllGameIntoDb(req.query, false);
 
   sendResponse(res, {
@@ -249,9 +247,7 @@ const updateLinkType: RequestHandlerWithFiles = catchAsync(async (req, res) => {
     user: req.user,
     headers: req.headers,
   });
-  const result = await GameServices.updateLinkTypeIntoDb(
-    req.body.data,
-  );
+  const result = await GameServices.updateLinkTypeIntoDb(req.body.data);
   sendResponse(res, {
     success: true,
     statusCode: httpStatus.OK,
@@ -279,6 +275,17 @@ const searchGame: RequestHandler = catchAsync(async (req, res) => {
   });
 });
 
+const singleGame = catchAsync(async (req, res) => {
+  const result = await GameServices.getSingleGameIntoDb(req.params.id);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: 'Successfully retrieved game',
+    data: result,
+  });
+});
+
 const GameController = {
   createNewGame,
   getAllGame,
@@ -295,6 +302,7 @@ const GameController = {
   updateGame,
   updateLinkType,
   searchGame,
+  singleGame,
 };
 
 export default GameController;
