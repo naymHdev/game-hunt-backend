@@ -75,8 +75,9 @@ const globalErrorHandelar:ErrorRequestHandler=(err,req,res,next)=>{
   }
   
 
-    return res.status(statusCode).json({success:false,message,  errorSources, stack:config.NODE_ENV==='development'?err?.stack:null});
-    next();
+    res.status(statusCode).json({success:false,message,  errorSources, stack:config.NODE_ENV==='development'?err?.stack:null});
+    // Do not call next() after sending a response
+    return;
   }
 
   export default globalErrorHandelar;
