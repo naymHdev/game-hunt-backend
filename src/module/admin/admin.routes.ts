@@ -98,7 +98,7 @@ router.delete(
 
 router.delete(
   '/delete-game',
-  auth(USER_ROLE.ADMIN, USER_ROLE.USER),
+  auth(USER_ROLE.ADMIN, USER_ROLE.SUPERADMIN),
   validationRequest(AdminValidationSchema.deleteGameValidationSchema),
   AdminController.deleteGameByAdmin,
 );
