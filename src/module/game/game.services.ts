@@ -476,7 +476,7 @@ const userGameUpvote = async (payload: GameUpvotePayload, userId: string) => {
     if (alreadyUpvoted) {
       throw new AppError(
         httpStatus.BAD_REQUEST,
-        'User has already upvoted this comment',
+        'User has already upvoted this game',
         '',
       );
     }
@@ -499,7 +499,7 @@ const userGameUpvote = async (payload: GameUpvotePayload, userId: string) => {
     ).populate('userId');
 
     if (!updatedGame) {
-      throw new AppError(httpStatus.NOT_FOUND, 'Failed to upvote game', '');
+      throw new AppError(httpStatus.NOT_FOUND, ' Failed to upvote game!', '');
     }
 
     return updatedGame;
@@ -630,6 +630,8 @@ export const getTopGameOfDay = async (query: TopGameQuery) => {
               },
             },
           },
+          totalComments: { $size: { $ifNull: ['$comments', []] } },
+          totalUpvotes: { $size: { $ifNull: ['$upvote', []] } },
         },
       },
       {
@@ -637,9 +639,16 @@ export const getTopGameOfDay = async (query: TopGameQuery) => {
           popularityScore: {
             $add: ['$todayComments', '$todayShares', '$todayUpvotes'],
           },
+          totalEngagement: { $add: ['$totalComments', '$totalUpvotes'] },
         },
       },
-      { $sort: { popularityScore: -1 } },
+      {
+        $sort: {
+          popularityScore: -1,
+          totalEngagement: -1,
+          createdAt: -1,
+        },
+      },
       {
         $lookup: {
           from: 'users',
@@ -648,8 +657,14 @@ export const getTopGameOfDay = async (query: TopGameQuery) => {
           as: 'userId',
         },
       },
-      { $unwind: '$userId' },
+      {
+        $unwind: {
+          path: '$userId',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
     ]);
+
     return topGames;
   } catch (error: any) {
     throw new AppError(
@@ -665,7 +680,7 @@ export const getTopGameOfWeek = async (query: TopGameQuery) => {
     const start = startOfWeek(new Date(), { weekStartsOn: 1 });
     const end = endOfWeek(new Date(), { weekStartsOn: 1 });
 
-    const topGames = await games.aggregate([
+    const topGames = await Game.aggregate([
       {
         $match: {
           isDelete: { $ne: true },
@@ -677,7 +692,7 @@ export const getTopGameOfWeek = async (query: TopGameQuery) => {
           weekComments: {
             $size: {
               $filter: {
-                input: { $ifNull: ['$comments', []] }, // Handle null values
+                input: { $ifNull: ['$comments', []] },
                 as: 'comment',
                 cond: {
                   $and: [
@@ -691,7 +706,7 @@ export const getTopGameOfWeek = async (query: TopGameQuery) => {
           weekShares: {
             $size: {
               $filter: {
-                input: { $ifNull: ['$shares', []] }, // Handle null values
+                input: { $ifNull: ['$shares', []] },
                 as: 'share',
                 cond: {
                   $and: [
@@ -705,7 +720,7 @@ export const getTopGameOfWeek = async (query: TopGameQuery) => {
           weekUpvotes: {
             $size: {
               $filter: {
-                input: { $ifNull: ['$upvote', []] }, // Handle null values
+                input: { $ifNull: ['$upvote', []] },
                 as: 'vote',
                 cond: {
                   $and: [
@@ -716,6 +731,8 @@ export const getTopGameOfWeek = async (query: TopGameQuery) => {
               },
             },
           },
+          totalComments: { $size: { $ifNull: ['$comments', []] } },
+          totalUpvotes: { $size: { $ifNull: ['$upvote', []] } },
         },
       },
       {
@@ -723,9 +740,16 @@ export const getTopGameOfWeek = async (query: TopGameQuery) => {
           popularityScore: {
             $add: ['$weekComments', '$weekShares', '$weekUpvotes'],
           },
+          totalEngagement: { $add: ['$totalComments', '$totalUpvotes'] },
         },
       },
-      { $sort: { popularityScore: -1 } },
+      {
+        $sort: {
+          popularityScore: -1,
+          totalEngagement: -1,
+          createdAt: -1,
+        },
+      },
       {
         $lookup: {
           from: 'users',
@@ -734,7 +758,12 @@ export const getTopGameOfWeek = async (query: TopGameQuery) => {
           as: 'userId',
         },
       },
-      { $unwind: '$userId' },
+      {
+        $unwind: {
+          path: '$userId',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
     ]);
 
     return topGames;

@@ -15,8 +15,8 @@ import { idConverter } from '../utility/idCoverter';
 const auth = (...requireRoles: UserRole[]) => {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
-    console.log('Authorization Header:', authHeader);
-    console.log('Required Roles:', requireRoles);
+    // console.log('Authorization Header:', authHeader);
+    // console.log('Required Roles:', requireRoles);
 
     if (!authHeader) {
       throw new AppError(httpStatus.UNAUTHORIZED, 'No token provided', '');
@@ -41,12 +41,12 @@ const auth = (...requireRoles: UserRole[]) => {
     }
 
     const { role, id, email } = decoded;
-    console.log('Decoded JWT Payload:', { role, id, email });
+    // console.log('Decoded JWT Payload:', { role, id, email });
 
     if (requireRoles.length && !requireRoles.includes(role)) {
       throw new AppError(httpStatus.FORBIDDEN, 'Access denied', '');
     }
-    console.log('Decoded Token:', decoded);
+    // console.log('Decoded Token:', decoded);
 
     let isUserExist = await User.findOne({ _id: await idConverter(id), email }).lean();
     if (!isUserExist && (role === USER_ROLE.ADMIN || role === USER_ROLE.SUPERADMIN)) {
@@ -57,7 +57,7 @@ const auth = (...requireRoles: UserRole[]) => {
       console.log('No user/admin found for id:', id, 'email:', email);
       throw new AppError(httpStatus.NOT_FOUND, 'User or Admin not found', '');
     }
-    console.log("decode user:", isUserExist);
+    // console.log("decode user:", isUserExist);
     req.user = isUserExist;
     next();
   });
